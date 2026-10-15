@@ -1,0 +1,403 @@
+<title>16 Years of Rebar</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a CAD sheet reduced to five things: title with score, four-era strip, the beam, one big button.
+   Single dark look on purpose: it mimics an AutoCAD model-space window. */
+:root{
+  --bg:#12161c;
+  --panel:#1b212a;
+  --beam:#212a35;
+  --grid:#222a35;
+  --grid-major:#2d3745;
+  --line:#8fa4bb;
+  --text:#e8edf3;
+  --muted:#93a0b1;
+  --accent:#ffb81c;
+  --accent-ink:#1b1400;
+  --ok:#5fe3a1;
+  --warn:#ffcf4a;
+  --bad:#ff5d5d;
+  --cyan:#5fd3e6;
+  --bar:#ff7a45;
+  --scrim:rgba(18,22,28,.94);
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+body{
+  background:var(--bg);color:var(--text);
+  font:400 14px/1.5 var(--mono);
+  padding-block:18px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.app{max-width:760px;margin:0 auto;display:grid;gap:14px;min-width:0}
+
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+h1{margin:0;font:800 clamp(38px,9vw,60px)/.92 var(--display);letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
+.score{font:800 clamp(38px,9vw,60px)/.92 var(--display);color:var(--accent);font-variant-numeric:tabular-nums}
+
+.eras{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.era{display:grid;gap:4px;min-width:0;align-content:start}
+.era i{display:block;height:10px;background:var(--grid-major)}
+.era b{font:800 clamp(17px,4.6vw,26px)/1 var(--display);letter-spacing:.02em;text-transform:uppercase;color:var(--muted);overflow-wrap:anywhere}
+.era span{font-size:11px;color:var(--muted)}
+.era.cur i{background:var(--text)}
+.era.cur b{color:var(--text)}
+.era.done i{background:var(--accent)}
+
+.stage{position:relative;border:1px solid var(--grid-major);background:var(--panel);min-width:0}
+.stage canvas{display:block;width:100%;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.stage.flash{box-shadow:inset 0 0 0 3px var(--bad)}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;padding:14px;background:var(--scrim);overflow:auto}
+.card{width:100%;max-width:420px;display:grid;gap:12px}
+.kicker{margin:0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-wrap:balance}
+.card h2{margin:0;font:800 clamp(34px,8vw,52px)/.95 var(--display);text-transform:uppercase;text-wrap:balance;font-variant-numeric:tabular-nums}
+.card p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+.card input{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:3px;padding:10px 12px;font:inherit;font-size:16px}
+.card textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:3px;padding:8px;font:inherit;font-size:13px;resize:none}
+.top3{margin:0;padding:0;list-style:none;display:grid;gap:3px}
+.top3 li{display:flex;gap:10px;align-items:baseline;border-bottom:1px dashed var(--grid-major);padding-bottom:2px;font-size:14px;font-variant-numeric:tabular-nums}
+.top3 li b{width:1.2em;color:var(--muted);font-weight:600}
+.top3 li span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+.top3 li em{font-style:normal;font-weight:600}
+.top3 li.me em{color:var(--accent)}
+.top3 li.me span{color:var(--text)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.primary{background:var(--accent);color:var(--accent-ink);border:0;border-radius:3px;padding:11px 22px;font:800 24px/1 var(--display);letter-spacing:.04em;text-transform:uppercase}
+.primary:disabled{opacity:.6}
+.secondary{background:none;border:1px solid var(--line);border-radius:3px;padding:10px 16px;font-size:14px}
+
+.tap{width:100%;height:80px;background:var(--accent);color:var(--accent-ink);border:0;border-radius:3px;font:800 32px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;user-select:none;-webkit-user-select:none}
+.tap:active:not(:disabled){transform:translateY(2px)}
+.tap:disabled{background:var(--grid-major);color:var(--muted)}
+
+.credit{margin:0;text-align:center;font-size:13px;letter-spacing:.04em;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.tap:active:not(:disabled){transform:none}}
+</style>
+
+<main class="app">
+  <div class="top">
+    <h1>16 Years of Engineering</h1>
+    <div class="score" id="score" role="status" aria-label="Score">0</div>
+  </div>
+  <div class="stage" id="stage">
+    <canvas id="cv" aria-label="Beam elevation. A line sweeps left to right; tap when it reaches a dashed mark."></canvas>
+    <div class="overlay" id="ov">
+      <div class="card">
+        <p class="kicker" id="ovKicker"></p>
+        <h2 id="ovTitle"></h2>
+        <p id="ovBody"></p>
+        <div id="ovExtra"></div>
+        <div class="actions">
+          <button class="primary" id="ovBtn" type="button"></button>
+          <button class="secondary" id="ovBtn2" type="button" hidden></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="eras" id="eras" role="img" aria-label="Four eras of four years each"></div>
+
+  <button class="tap" id="tap" type="button" disabled>Tap</button>
+
+  <p class="credit">NAS Tools By Nader ASSAF</p>
+</main>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- Content (edit names, years and the line below here) ---------- */
+const NOTE='16 years of engineering, rebars, automation';
+// per = stirrups placed by one tap (0 = the whole beam). margin = spacings before the first mark.
+const LEVELS=[
+  {name:'By hand',     yrs:'1–4',  per:1, n:6,  s:200, rate:1.2, margin:1,   tolF:.30},
+  {name:'Copy & array',yrs:'5–8',  per:3, n:9,  s:150, rate:1.5, margin:1.5, tolF:.26},
+  {name:'Scripts',     yrs:'9–12', per:6, n:12, s:125, rate:1.8, margin:2,   tolF:.22},
+  {name:'Own tools',   yrs:'13–16',per:0, n:16, s:125, rate:2.2, margin:3,   tolF:.20}
+];
+
+const $=id=>document.getElementById(id);
+const stage=$('stage'),cv=$('cv'),ctx=cv.getContext('2d');
+const ov=$('ov'),ovKicker=$('ovKicker'),ovTitle=$('ovTitle'),ovBody=$('ovBody'),ovExtra=$('ovExtra'),ovBtn=$('ovBtn'),ovBtn2=$('ovBtn2');
+const tapBtn=$('tap'),erasEl=$('eras'),scoreEl=$('score');
+const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt=n=>Number(n).toLocaleString('en-US');
+
+const cs=getComputedStyle(document.documentElement);
+const tok=n=>cs.getPropertyValue(n).trim();
+const C={panel:tok('--panel'),beam:tok('--beam'),grid:tok('--grid'),gridMajor:tok('--grid-major'),line:tok('--line'),
+  text:tok('--text'),ok:tok('--ok'),warn:tok('--warn'),bad:tok('--bad'),cyan:tok('--cyan'),bar:tok('--bar')};
+
+/* ---------- State ---------- */
+let state='title';            // title | running | retry | between | win
+let lv=0;                     // current level index
+let score=0,levelStart=0;
+let run=null;
+let W=360,H=280,dpr=1;
+
+function makeRun(i){
+  const d=LEVELS[i];
+  const g=d.per>0?Math.min(d.per,d.n):d.n;
+  const r={s:d.s,n:d.n,g:g,L:d.s*(d.margin+d.n),v:d.s*d.rate,tol:d.s*d.tolF,
+    targets:[],strays:[],t0:0,started:false,doneAt:0};
+  for(let k=0;k<d.n;k++)r.targets.push({x:d.s*(d.margin+k),start:k%g===0,grp:Math.floor(k/g),done:false,res:null,px:0});
+  return r;
+}
+const demo=makeRun(0);
+function cursorX(r,now){
+  if(!r.started){
+    if(reduce)return r.L*0.35;
+    return((now/1000)*r.v)%r.L;
+  }
+  return Math.max(0,Math.min(r.L,(now-r.t0)*r.v/1000));
+}
+function setScore(){scoreEl.textContent=fmt(score);}
+
+/* ---------- Era strip ---------- */
+LEVELS.forEach(function(d){
+  const e=document.createElement('div');e.className='era';
+  e.innerHTML='<i></i><b></b><span></span>';
+  e.children[1].textContent=d.name;e.children[2].textContent='Years '+d.yrs;
+  erasEl.appendChild(e);
+});
+function updateStrip(){
+  for(let i=0;i<LEVELS.length;i++){
+    let c='era';
+    if(state==='win'||i<lv)c+=' done';
+    else if(i===lv&&state!=='title')c+=' cur';
+    erasEl.children[i].className=c;
+  }
+}
+
+/* ---------- Sound ---------- */
+let ac=null;
+function ensureAudio(){
+  if(!ac){try{ac=new(window.AudioContext||window.webkitAudioContext)();}catch(e){ac=null;}}
+  if(ac&&ac.state==='suspended'){ac.resume().catch(function(){});}
+}
+function beep(f,d,type){
+  if(!ac)return;
+  try{
+    const o=ac.createOscillator(),g=ac.createGain();
+    o.type=type||'square';o.frequency.value=f;
+    g.gain.setValueAtTime(0.05,ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+d);
+    o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d);
+  }catch(e){}
+}
+document.addEventListener('pointerdown',ensureAudio);
+
+/* ---------- Overlay ---------- */
+function showOverlay(o){
+  ovKicker.textContent=o.kicker||'';ovKicker.hidden=!o.kicker;
+  ovTitle.textContent=o.title;
+  ovBody.textContent=o.body||'';ovBody.hidden=!o.body;
+  ovExtra.replaceChildren();
+  ovBtn.textContent=o.label;ovBtn.disabled=false;ovBtn.onclick=o.fn;
+  if(o.label2){ovBtn2.hidden=false;ovBtn2.textContent=o.label2;ovBtn2.onclick=o.fn2;}else{ovBtn2.hidden=true;}
+  ov.hidden=false;
+  if(o.focus)o.focus();else ovBtn.focus({preventScroll:true});
+}
+
+/* ---------- Flow ---------- */
+function resetGame(){lv=0;score=0;levelStart=0;setScore();}
+function showTitle(){
+  state='title';run=null;lv=0;tapBtn.disabled=true;updateStrip();
+  showOverlay({kicker:NOTE,title:'Place the stirrups',body:'Tap when the line reaches a dashed mark.',label:'Start',
+    fn:function(){resetGame();beginLevel(0);}});
+}
+function beginLevel(i){
+  lv=i;score=levelStart;setScore();
+  run=makeRun(i);run.started=true;run.t0=performance.now()+700;
+  state='running';ov.hidden=true;tapBtn.disabled=false;updateStrip();
+}
+function fail(){
+  if(state!=='running')return;
+  state='retry';tapBtn.disabled=true;
+  stage.classList.add('flash');
+  beep(160,0.2,'sawtooth');
+  setTimeout(function(){stage.classList.remove('flash');},260);
+  setTimeout(function(){if(state==='retry')beginLevel(lv);},800);
+}
+
+// Top 3 scores kept on this device only.
+const TOPKEY='rebar16.top';
+let curTop=[],curEntry=null;
+function loadTop(){
+  try{
+    const a=JSON.parse(localStorage.getItem(TOPKEY)||'[]');
+    if(Array.isArray(a))return a.filter(function(x){return x&&typeof x.score==='number';}).map(function(x){return{name:String(x.name||'').slice(0,24),score:x.score};});
+  }catch(e){}
+  return[];
+}
+function saveTop(){try{localStorage.setItem(TOPKEY,JSON.stringify(curTop));}catch(e){}}
+function renderTop(){
+  const ol=$('top3');if(!ol)return;
+  ol.replaceChildren();
+  curTop.forEach(function(x,i){
+    const li=document.createElement('li'),r=document.createElement('b'),n=document.createElement('span'),s=document.createElement('em');
+    r.textContent=String(i+1);n.textContent=x===curEntry?'This run':'';s.textContent=fmt(x.score);
+    if(x===curEntry)li.className='me';
+    li.appendChild(r);li.appendChild(n);li.appendChild(s);ol.appendChild(li);
+  });
+}
+function win(){
+  state='win';tapBtn.disabled=true;updateStrip();
+  curEntry={name:'',score:score};
+  curTop=loadTop();curTop.push(curEntry);
+  curTop.sort(function(a,b){return b.score-a.score;});
+  curTop=curTop.slice(0,3);saveTop();
+  showOverlay({
+    kicker:NOTE,title:fmt(score),body:'',
+    label:'Play again',fn:function(){resetGame();beginLevel(0);}
+  });
+  const ol=document.createElement('ol');ol.id='top3';ol.className='top3';ol.setAttribute('aria-label','Top 3 scores');
+  ovExtra.appendChild(ol);
+  renderTop();
+}
+
+function doTap(){
+  if(state!=='running'||!run||!run.started)return;
+  const now=performance.now();
+  if(now<run.t0)return;
+  const x=cursorX(run,now);
+  let target=null,bd=Infinity;
+  run.targets.forEach(function(t){
+    if(t.done||!t.start)return;
+    const d=Math.abs(x-t.x);if(d<bd){bd=d;target=t;}
+  });
+  if(!target)return;
+  if(bd>0.5*run.s){run.strays.push({x:x,err:x-target.x});fail();return;}
+  const err=x-target.x,a=Math.abs(err);
+  const limit=Math.min(2*run.tol,0.45*run.s);
+  const res=a<=run.tol?'ok':(a<=limit?'tight':'bad');
+  let k=0;
+  run.targets.forEach(function(m){
+    if(!m.done&&m.grp===target.grp){m.done=true;m.res=res;m.px=m.x+err;m.err=err;m.lead=(k===0);k++;}
+  });
+  if(res==='bad'){fail();return;}
+  score+=Math.max(10,Math.round(100*(1-a/limit)))*k;setScore();
+  beep(res==='ok'?740:480,0.08);
+}
+function step(now){
+  if(state!=='running'||!run.started)return;
+  const cx=cursorX(run,now);
+  for(let i=0;i<run.targets.length;i++){
+    const t=run.targets[i];
+    if(!t.done&&t.start&&cx>t.x+0.5*run.s){
+      t.done=true;t.res='miss';
+      fail();return;
+    }
+  }
+  if(!run.doneAt&&run.targets.every(function(t){return t.done;}))run.doneAt=now;
+  if(run.doneAt&&now>=run.doneAt+350){
+    state='between';tapBtn.disabled=true;levelStart=score;
+    if(lv>=LEVELS.length-1){beep(990,0.25,'triangle');win();return;}
+    beep(880,0.15,'triangle');
+    lv++;updateStrip();
+    setTimeout(function(){if(state==='between')beginLevel(lv);},700);
+  }
+}
+
+/* ---------- Input ---------- */
+tapBtn.addEventListener('pointerdown',function(e){e.preventDefault();doTap();});
+cv.addEventListener('pointerdown',function(e){e.preventDefault();doTap();});
+window.addEventListener('keydown',function(e){
+  if(e.repeat)return;
+  if(state==='running'&&(e.code==='Space'||e.code==='Enter')){e.preventDefault();doTap();}
+});
+
+/* ---------- Drawing ---------- */
+function layout(){
+  dpr=Math.min(window.devicePixelRatio||1,2);
+  W=Math.max(280,Math.floor(stage.clientWidth));
+  H=Math.round(Math.max(300,Math.min(W*0.5,340)));
+  cv.style.height=H+'px';
+  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+}
+new ResizeObserver(function(){if(Math.floor(stage.clientWidth)!==W)layout();}).observe(stage);
+
+function line(x1,y1,x2,y2){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
+// Deviation from the mark in mm: minus = tapped early (left), plus = tapped late (right).
+function devLabel(px,py,err,col){
+  const e=Math.round(err);
+  ctx.font='600 12px "IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace';
+  ctx.textAlign='center';ctx.fillStyle=col;
+  ctx.fillText((e>0?'+':(e<0?'−':''))+Math.abs(e),Math.max(16,Math.min(W-16,px)),py);
+}
+
+function draw(now){
+  const v=run||demo;
+  const cx=cursorX(v,now);
+  const padX=22,bx0=padX,bx1=W-padX,sx=(bx1-bx0)/v.L;
+  const X=function(mm){return bx0+mm*sx;};
+  const bt=Math.round(H*0.25),bb=Math.round(H*0.75);
+  const sy0=bt+7,sy1=bb-7;
+
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle=C.panel;ctx.fillRect(0,0,W,H);
+  ctx.lineWidth=1;
+  for(let x=0;x<=W;x+=20){ctx.strokeStyle=(x%100===0)?C.gridMajor:C.grid;line(x+.5,0,x+.5,H);}
+  for(let y=0;y<=H;y+=20){ctx.strokeStyle=(y%100===0)?C.gridMajor:C.grid;line(0,y+.5,W,y+.5);}
+
+  // beam, supports, longitudinal bars
+  ctx.fillStyle=C.beam;ctx.fillRect(bx0,bt,bx1-bx0,bb-bt);
+  ctx.strokeStyle=C.line;ctx.lineWidth=1.5;ctx.strokeRect(bx0,bt,bx1-bx0,bb-bt);
+  [bx0,bx1].forEach(function(p){
+    ctx.beginPath();ctx.moveTo(p,bb);ctx.lineTo(p-10,bb+14);ctx.lineTo(p+10,bb+14);ctx.closePath();ctx.stroke();
+  });
+  ctx.strokeStyle=C.bar;ctx.lineWidth=3;
+  line(bx0+5,bt+11,bx1-5,bt+11);line(bx0+5,bb-11,bx1-5,bb-11);
+
+  // marks and stirrups
+  v.targets.forEach(function(t){
+    if(!t.done){
+      ctx.setLineDash([4,4]);ctx.strokeStyle=C.cyan;ctx.globalAlpha=t.start?.9:.3;ctx.lineWidth=t.start?2:1.2;
+      line(X(t.x),sy0,X(t.x),sy1);ctx.setLineDash([]);ctx.globalAlpha=1;
+      return;
+    }
+    if(t.res==='miss'){
+      const mx=X(t.x),my=(bt+bb)/2;
+      ctx.strokeStyle=C.bad;ctx.lineWidth=2;
+      line(mx-6,my-6,mx+6,my+6);line(mx-6,my+6,mx+6,my-6);
+      return;
+    }
+    const col=t.res==='ok'?C.ok:(t.res==='tight'?C.warn:C.bad);
+    ctx.strokeStyle=col;
+    ctx.lineWidth=2.5;line(X(t.px),sy0,X(t.px),sy1);
+    if(t.lead)devLabel(X(t.px),bt-9,t.err,col);
+  });
+  v.strays.forEach(function(s){
+    ctx.strokeStyle=C.bad;ctx.lineWidth=2.5;line(X(s.x),sy0,X(s.x),sy1);
+    devLabel(X(s.x),bt-9,s.err,C.bad);
+  });
+
+  // crosshair cursor
+  const cxp=X(cx);
+  ctx.strokeStyle=C.text;ctx.lineWidth=1;ctx.globalAlpha=.9;
+  line(cxp+.5,8,cxp+.5,H-8);
+  ctx.strokeRect(cxp-5,(bt+bb)/2-5,10,10);
+  ctx.globalAlpha=1;
+}
+
+function frame(){
+  const now=performance.now();
+  if(state==='running')step(now);
+  draw(now);
+  requestAnimationFrame(frame);
+}
+
+/* ---------- Boot ---------- */
+layout();
+showTitle();
+requestAnimationFrame(frame);
+})();
+</script>
